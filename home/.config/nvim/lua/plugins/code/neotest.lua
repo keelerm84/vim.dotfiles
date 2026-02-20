@@ -16,6 +16,7 @@ return {
       "mrcjkb/rustaceanvim",
       "olimorris/neotest-rspec",
       "nvim-neotest/neotest-python",
+      "olimorris/neotest-phpunit",
     },
     config = function()
       require("neotest").setup({
@@ -29,6 +30,7 @@ return {
             dap = { justMyCode = false },
             runner = "pytest",
           }),
+          require("neotest-phpunit"),
         },
       })
     end,
