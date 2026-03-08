@@ -16,6 +16,7 @@ require("config.options")
 require("config.functions")
 require("config.keymaps")
 require("config.autocmd")
+require("config.packs").setup(config.language_packs)
 require("config.lazy").setup(config)
 
 config.after_load()

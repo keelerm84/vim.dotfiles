@@ -6,33 +6,19 @@ return {
       "nvim-lua/plenary.nvim",
       "antoinemadec/FixCursorHold.nvim",
       "nvim-treesitter/nvim-treesitter",
-      "nvim-neotest/neotest-vim-test",
-      {
-        "fredrikaverpil/neotest-golang",
-        build = function()
-          vim.system({ "go", "install", "gotest.tools/gotestsum@latest" }):wait() -- Optional, but recommended
-        end,
-      },
-      "mrcjkb/rustaceanvim",
-      "olimorris/neotest-rspec",
-      "nvim-neotest/neotest-python",
-      "olimorris/neotest-phpunit",
     },
     config = function()
-      require("neotest").setup({
-        adapters = {
-          require("neotest-golang")({
-            runner = "gotestsum",
-          }),
-          require("rustaceanvim.neotest"),
-          require("neotest-rspec"),
-          require("neotest-python")({
-            dap = { justMyCode = false },
-            runner = "pytest",
-          }),
-          require("neotest-phpunit"),
-        },
-      })
+      local adapters = {}
+      local function try_adapter(mod, setup_fn)
+        local ok, m = pcall(require, mod)
+        if ok then table.insert(adapters, setup_fn and setup_fn(m) or m) end
+      end
+      try_adapter("neotest-golang", function(m) return m({ runner = "gotestsum" }) end)
+      try_adapter("rustaceanvim.neotest")
+      try_adapter("neotest-rspec")
+      try_adapter("neotest-python", function(m) return m({ dap = { justMyCode = false }, runner = "pytest" }) end)
+      try_adapter("neotest-phpunit")
+      require("neotest").setup({ adapters = adapters })
     end,
     keys = {
       {

@@ -11,76 +11,7 @@ return {
           require("mason").setup()
 
           require("mason-tool-installer").setup({
-            ensure_installed = {
-              --
-              -- Linter, Formatter, & LSP
-              --
-              "ruff",
-
-              --
-              -- LSP
-              --
-              "bashls",
-              "bright_script",
-              "clangd",
-              "cssls",
-              "dockerls",
-              "gopls",
-              "helm_ls",
-              "hls",
-              "html",
-              "intelephense",
-              "jsonls",
-              "jdtls",
-              "ltex",
-              "lua_ls",
-              "omnisharp",
-              "phpactor",
-              "pylsp",
-              "pyright",
-              "rust_analyzer",
-              "starpls",
-              "solargraph",
-              "sqlls",
-              "stimulus_ls",
-              "terraformls",
-              "ts_ls",
-              "zls",
-
-              --
-              -- Linter
-              --
-              "checkmake",
-              "eslint_d",
-              "golangci-lint",
-              "sonarlint-language-server",
-              "sqlfluff",
-
-              --
-              -- Linter + Formatter
-              --
-              "buf",
-
-              --
-              -- Formatter only
-              --
-              "beautysh",
-              "black",
-              "brighterscript-formatter",
-              "fourmolu",
-              "gofumpt",
-              "goimports",
-              "google-java-format",
-              "isort",
-              "jq",
-              "php-cs-fixer",
-              "prettierd",
-              "prettier",
-              "rubocop",
-              "shfmt",
-              "stylua",
-              "trivy",
-            },
+            ensure_installed = require("config.packs").get_mason_tools(),
           })
 
           require("mason-lspconfig").setup()

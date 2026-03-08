@@ -8,17 +8,7 @@ return {
     config = function()
       local lint = require("lint")
 
-      lint.linters_by_ft = {
-        go = { "golangcilint" },
-        helm = { "trivy" },
-        javascript = { "eslint_d" },
-        javascriptreact = { "eslint_d" },
-        make = { "checkmake" },
-        python = { "pylint" },
-        sql = { "sqlfluff" },
-        typescript = { "eslint_d" },
-        typescriptreact = { "eslint_d" },
-      }
+      lint.linters_by_ft = require("config.packs").get_linters_by_ft()
 
       local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
 
