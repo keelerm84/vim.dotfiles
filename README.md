@@ -34,6 +34,37 @@ language_packs = ":all"
 language_packs = { "go", "rust", "lua" }
 ```
 
+**Install specific languages with overrides for one or more packs:**
+
+Mix plain strings (use defaults) with config tables (override specific fields). Any field you omit falls back to the pack's defaults.
+
+```lua
+language_packs = {
+    "rust",
+    "lua",
+    {
+        name = "go",
+        -- only install gopls; skip gofumpt, goimports, golangci-lint
+        mason = { "gopls" },
+        -- keep default formatters and parsers (omitted = use defaults)
+    },
+    {
+        name = "python",
+        -- swap black/isort for ruff-only formatting
+        formatters = { python = { "ruff" } },
+    },
+}
+```
+
+The overridable fields per pack are:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `mason` | `string[]` | Mason package names to install |
+| `formatters` | `{ [filetype]: string[] }` | conform `formatters_by_ft` entries |
+| `linters` | `{ [filetype]: string[] }` | nvim-lint `linters_by_ft` entries |
+| `parsers` | `string[]` | Treesitter parser names |
+
 **Install nothing language-specific** (omit the key, or set it to an empty table):
 ```lua
 language_packs = {}

@@ -66,18 +66,40 @@ All language-specific tooling is managed through `lua/config/packs.lua`. When ad
 
 ### `local.lua` interface
 
-Users configure language support via `lua/local.lua` (not tracked in the repo):
+Users configure language support via `lua/local.lua` (not tracked in the repo). The `language_packs` value accepts three forms:
 
+**String `":all"`** — enable every pack with defaults:
 ```lua
-return {
-    language_packs = ":all",   -- or { "go", "rust" }, or {} for nothing
-    plugins = {},
-    after_load = function() end,
+language_packs = ":all"
+```
+
+**List of strings** — enable those packs with defaults:
+```lua
+language_packs = { "go", "rust", "lua" }
+```
+
+**List of strings and/or config tables** — enable packs, with per-pack overrides for any field:
+```lua
+language_packs = {
+    "rust",
+    { name = "go", mason = { "gopls" } },             -- override mason only
+    { name = "python", formatters = { python = { "ruff" } } },  -- override formatters only
 }
 ```
 
-- `":all"` — enable every pack in the registry
-- `{ "go", "rust" }` — only those packs
-- `{}` or key absent — no language tooling installed
+A config table must have a `name` field (the pack name). Any of `mason`, `formatters`, `linters`, `parsers` can be overridden; omitted fields fall back to the pack's registered defaults. If `name` is not in the registry the omitted fields default to empty tables, so config tables can also introduce entirely new languages.
+
+**Empty or absent** — no language tooling:
+```lua
+language_packs = {}
+```
+
+### How `setup()` works internally
+
+`packs.setup()` resolves every item in the list into an *effective config* stored in `_packs[lang]`:
+- String → copies `languages[lang]` as-is
+- Config table → merges the table's fields over `languages[name]` defaults
+
+All API functions (`get_mason_tools`, `get_formatters_by_ft`, etc.) iterate `_packs` directly and never touch `languages` at runtime, so overrides are fully transparent to callers.
 
 Two packs (e.g. `javascript` and `typescript`) can safely declare overlapping mason tools or formatters — `get_mason_tools()` and `get_parsers()` deduplicate, and `get_formatters_by_ft()`/`get_linters_by_ft()` use first-one-wins per filetype.

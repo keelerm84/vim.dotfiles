@@ -192,36 +192,46 @@ local languages = {
   },
 }
 
-local _enabled = {}
+-- Maps lang name → effective pack config (defaults merged with any user overrides).
+local _packs = {}
 
 function M.setup(setting)
-  _enabled = {}
+  _packs = {}
   if setting == ":all" then
-    for lang in pairs(languages) do
-      _enabled[lang] = true
+    for lang, pack in pairs(languages) do
+      _packs[lang] = pack
     end
   elseif type(setting) == "table" then
-    for _, lang in ipairs(setting) do
-      _enabled[lang] = true
+    for _, item in ipairs(setting) do
+      if type(item) == "string" then
+        if languages[item] then
+          _packs[item] = languages[item]
+        end
+      elseif type(item) == "table" and type(item.name) == "string" then
+        local base = languages[item.name] or { mason = {}, formatters = {}, linters = {}, parsers = {} }
+        _packs[item.name] = {
+          mason      = item.mason      or base.mason,
+          formatters = item.formatters or base.formatters,
+          linters    = item.linters    or base.linters,
+          parsers    = item.parsers    or base.parsers,
+        }
+      end
     end
   end
 end
 
 function M.is_enabled(lang)
-  return _enabled[lang] == true
+  return _packs[lang] ~= nil
 end
 
 function M.get_mason_tools()
   local seen = {}
   local tools = {}
-  for lang, _ in pairs(_enabled) do
-    local pack = languages[lang]
-    if pack then
-      for _, tool in ipairs(pack.mason) do
-        if not seen[tool] then
-          seen[tool] = true
-          table.insert(tools, tool)
-        end
+  for _, pack in pairs(_packs) do
+    for _, tool in ipairs(pack.mason) do
+      if not seen[tool] then
+        seen[tool] = true
+        table.insert(tools, tool)
       end
     end
   end
@@ -230,13 +240,10 @@ end
 
 function M.get_formatters_by_ft()
   local result = {}
-  for lang, _ in pairs(_enabled) do
-    local pack = languages[lang]
-    if pack then
-      for ft, formatters in pairs(pack.formatters) do
-        if not result[ft] then
-          result[ft] = formatters
-        end
+  for _, pack in pairs(_packs) do
+    for ft, formatters in pairs(pack.formatters) do
+      if not result[ft] then
+        result[ft] = formatters
       end
     end
   end
@@ -245,13 +252,10 @@ end
 
 function M.get_linters_by_ft()
   local result = {}
-  for lang, _ in pairs(_enabled) do
-    local pack = languages[lang]
-    if pack then
-      for ft, linters in pairs(pack.linters) do
-        if not result[ft] then
-          result[ft] = linters
-        end
+  for _, pack in pairs(_packs) do
+    for ft, linters in pairs(pack.linters) do
+      if not result[ft] then
+        result[ft] = linters
       end
     end
   end
@@ -267,14 +271,11 @@ function M.get_parsers()
       table.insert(parsers, p)
     end
   end
-  for lang, _ in pairs(_enabled) do
-    local pack = languages[lang]
-    if pack then
-      for _, p in ipairs(pack.parsers) do
-        if not seen[p] then
-          seen[p] = true
-          table.insert(parsers, p)
-        end
+  for _, pack in pairs(_packs) do
+    for _, p in ipairs(pack.parsers) do
+      if not seen[p] then
+        seen[p] = true
+        table.insert(parsers, p)
       end
     end
   end
