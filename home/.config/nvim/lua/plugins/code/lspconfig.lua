@@ -10,8 +10,14 @@ return {
         config = function()
           require("mason").setup()
 
+          -- Mason has no linux-arm64 builds of these tools.
+          local no_arm64 = { clangd = true, starpls = true, checkmake = true, fourmolu = true }
+          local is_arm64 = vim.uv.os_uname().machine == "aarch64"
+
           require("mason-tool-installer").setup({
-            ensure_installed = {
+            ensure_installed = vim.tbl_filter(function(tool)
+              return not (is_arm64 and no_arm64[tool])
+            end, {
               --
               -- Linter, Formatter, & LSP
               --
@@ -80,7 +86,7 @@ return {
               "shfmt",
               "stylua",
               "trivy",
-            },
+            }),
           })
 
           require("mason-lspconfig").setup()
