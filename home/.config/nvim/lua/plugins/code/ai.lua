@@ -19,6 +19,7 @@ return {
     dependencies = {
       "nvim-treesitter/nvim-treesitter",
       "nvim-lua/plenary.nvim",
+      { "ColinKennedy/mega.cmdparse", dependencies = { "ColinKennedy/mega.logging" } },
       "MunifTanjim/nui.nvim",
       "stevearc/dressing.nvim", -- for dressing provider
       "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
